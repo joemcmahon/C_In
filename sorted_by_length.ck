@@ -17,7 +17,7 @@
 // A more typical 'In C' performance is 20-60 minutes.  Increase the
 // min/max repetitions to achieve this...
 //
-240 => float bps;     // ticks/second
+144 => float bps;     // ticks/second
 4 => int minRepeats;  // minimum times to repeat a phrase
 10 => int maxRepeats; // maximum times to repeat a phrase
 
@@ -433,11 +433,6 @@ fun int phraseLength(int ph[][])
 for (0 => int i; i < originalPhraseList.cap(); i++) {
    i => phraseIndex[i];
    phraseLength(originalPhraseList[i]) => phraseLengths[i];
-   
-   // Debug for long phrases to verify they're being identified
-   if (originalPhraseList[i].cap() > 0 && (phraseLengths[i] > 500)) {
-       <<< "Found long phrase at index", i, "length:", phraseLengths[i], "ticks" >>>;
-   }
 }
 
 // Sort phrases by length, shortest to longest
@@ -529,11 +524,6 @@ fun void repeatPhrase(int ph[][], int n, int player)
   20 => voc.freq;
   phraseLength(ph) => float totBeats;
   
-  // Debug long duration phrases
-  if (ph.cap() > 0 && ph[0][3] > 300) {
-      <<< "Player", player, "playing long duration phrase, length:", totBeats >>>;
-  }
-  
   for (0 => int pp; pp < n; ++pp)
   {
     playPhrase(ph, voc);
@@ -567,12 +557,6 @@ fun void doRileyPart(int player)
         // Print phrase info
         <<< "Player", player, "starting phrase", p, "length:", phraseLength(originalPhraseList[actualPhraseIndex]),
             "original index:", actualPhraseIndex >>>;
-
-        // Special debug for very long notes
-        if (originalPhraseList[actualPhraseIndex].cap() > 0 &&
-            phraseLength(originalPhraseList[actualPhraseIndex]) > 500) {
-            <<< "  **** LONG PHRASE ALERT ****" >>>;
-        }
 
         Std.rand2(minRepeats,maxRepeats) => int nTimes;
 
