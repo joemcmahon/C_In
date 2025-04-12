@@ -21,19 +21,19 @@
 5.0 => float outroSec;
 
 144 => float bps;     // ticks/second
-4 => int minRepeats;  // minimum times to repeat a phrase
-10 => int maxRepeats; // maximum times to repeat a phrase
-4 => int gapSize;     // Maximum lead or lag for phrases
+3 => int minRepeats;  // minimum times to repeat a phrase
+12 => int maxRepeats; // maximum times to repeat a phrase
+6 => int gapSize;     // Maximum lead or lag for phrases
 
- [new StifKarp,
+ [new Shakers,
+ new Rhodey,
+ new Moog,
  new StifKarp,
- new StifKarp,
- new StifKarp,
- new StifKarp,
- new StifKarp,
- new Mandolin,
- new Mandolin,
- new Mandolin,
+ new Moog,
+ new Clarinet,
+ new Flute,
+ new Saxofony,
+ new Rhodey,
  new Mandolin,
  new Mandolin] @=> StkInstrument players[];
 
@@ -41,14 +41,14 @@
 
 [
   // midi pitch, vol, start-ticks, dur-ticks
-  [72, 50, 0, 48],
-  [72, 50, 48, 48],
-  [72, 50, 96, 48],
-  [72, 50, 144, 48],
-  [72, 50, 192, 48],
-  [72, 50, 240, 48],
-  [72, 50, 288, 48],
-  [72, 50, 336, 48]
+  [72, 127, 0, 48],
+  [72, 127, 48, 48],
+  [72, 127, 96, 48],
+  [72, 127, 144, 48],
+  [72, 127, 192, 48],
+  [72, 127, 240, 48],
+  [72, 127, 288, 48],
+  [72, 127, 336, 48]
 ] @=> int pulsePhrase[][];
 
 // Phrases transcribed from 'In C' by Terry Riley
