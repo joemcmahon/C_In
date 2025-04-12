@@ -17,9 +17,13 @@
 // A more typical 'In C' performance is 20-60 minutes.  Increase the
 // min/max repetitions to achieve this...
 //
+5.0 => float introSec;
+5.0 => float outroSec;
+
 144 => float bps;     // ticks/second
 4 => int minRepeats;  // minimum times to repeat a phrase
 10 => int maxRepeats; // maximum times to repeat a phrase
+4 => int gapSize;     // Maximum lead or lag for phrases
 
  [new StifKarp,
  new StifKarp,
@@ -429,15 +433,17 @@ fun int phraseLength(int ph[][])
    return ph[ph.cap()-1][2] + ph[ph.cap()-1][3];
 }
 
+originalPhraseList.cap() => int phraseCount;
+
 // Initialize phrase index and calculate lengths
-for (0 => int i; i < originalPhraseList.cap(); i++) {
+for (0 => int i; i < phraseCount; i++) {
    i => phraseIndex[i];
    phraseLength(originalPhraseList[i]) => phraseLengths[i];
 }
 
 // Sort phrases by length, shortest to longest
-for (0 => int i; i < originalPhraseList.cap(); i++) {
-   for (0 => int j; j < originalPhraseList.cap() - i - 1; j++) {
+for (0 => int i; i < phraseCount; i++) {
+   for (0 => int j; j < phraseCount - i - 1; j++) {
       if (phraseLengths[j] > phraseLengths[j+1]) {  // Changed to > for ascending order
          // Swap lengths
          phraseLengths[j] => int tempLength;
@@ -467,7 +473,7 @@ for (0 => int i; i < players.cap(); i++) {
 fun int shouldWait(int currentPlayer, int nextPhrase) {
     // Allow gap to grow as piece progresses
     // FIX: Use Std.ftoi for proper type conversion
-    Std.ftoi(4 + Math.floor(nextPhrase/10.0)) => int maxGap;
+    Std.ftoi(gapSize + Math.floor(nextPhrase/10.0)) => int maxGap;
     
     for (0 => int i; i < players.cap(); i++) {
         if (i != currentPlayer && i > 0) {  // Skip pulse player (0) and self
@@ -527,7 +533,7 @@ fun void repeatPhrase(int ph[][], int n, int player)
   for (0 => int pp; pp < n; ++pp)
   {
     playPhrase(ph, voc);
-  }      
+  }
 }
 
 // Performance by a single player
@@ -555,32 +561,39 @@ fun void doRileyPart(int player)
         updatePlayerPhrase(player, p);
 
         // Print phrase info
-        <<< "Player", player, "starting phrase", p, "length:", phraseLength(originalPhraseList[actualPhraseIndex]),
+        <<< "Player", player, "starting phrase", p, "/", phraseCount, "length:", phraseLength(originalPhraseList[actualPhraseIndex]),
             "original index:", actualPhraseIndex >>>;
 
         Std.rand2(minRepeats,maxRepeats) => int nTimes;
+        if (playersIn == 1) {
+            1 => nTimes;
+        }
 
         // Play the phrase from the original list using our sorted index
         repeatPhrase(originalPhraseList[actualPhraseIndex], nTimes, player);
     }
     <<< "Player", player, "finished all phrases" >>>;
-    --playersIn;
+    playersIn--;
 }
 
 // Performance by the Pulse player
 fun void doPulse()
 {
-  do {
+  playersIn => int playersNow;
+  while(playersNow > 1) {
      repeatPhrase(pulsePhrase, 1, 0);
-  } while (playersIn > 0);
+     if (playersIn < playersNow) {
+       <<< "down to", playersIn, "players" >>>;
+       playersIn => playersNow;
+     }
+  }
   
-  // Continue playing pulse for ~8 seconds after all players finish
-  // Calculate how many repeats of the pulse pattern equals ~8 seconds
-  8::second => dur continueTime;
+  // Continue playing pulse for a few seconds after all players finish
+  // Calculate how many repeats of the pulse pattern equals the outro time
   phraseLength(pulsePhrase)/bps => float pulseTimeInSeconds;
-  Math.ceil(8.0/pulseTimeInSeconds) => float continueRepeats;
+  Math.ceil(outroSec/pulseTimeInSeconds) => float continueRepeats;
   
-  <<< "All players finished! Continuing pulse for", continueTime/second, "seconds,", 
+  <<< "All players finished! Continuing pulse for", outroSec, "seconds,", 
       Std.ftoi(continueRepeats), "repeats" >>>;
   
   // Play the additional pulses
@@ -606,12 +619,12 @@ for (0 => int i; i < players.cap(); ++i)
 spork ~ doPulse();
 
 // Let him go for a bit...
-(phraseLength(pulsePhrase)*4/bps)::second => now;
+(phraseLength(pulsePhrase)*introSec/bps)::second => now;
 
 // Start up all the players
 doRileyParts();
 
 // Let time elapse until the pulse stops
-do {
+while (pulseIsPlaying){
   1::second => now;
-} while (pulseIsPlaying);
+}
