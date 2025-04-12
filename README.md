@@ -57,3 +57,12 @@ code to work through that to play the phrases. (It tried multiple times to sort 
 when the other players had stopped, and it gave me an implementation that didn't quite work...and I ran out of tokens again.
 
 I'm committing the all-mandolin, no panning version for today, but I want to update this to use MIDI and talk to Live so I can use more interesting sounds. My tokens refresh at 4 PM...
+
+Update, day 2:
+
+Because I want to get this out the door, I asked Claude for some quick help adding pan and transposition to the instruments.
+And because Claude isn't actually all that good at keeping context, it actually accidentally transposed the Shaker
+instrument, which gave me cool tuned percussion. I leapt on that like a...leopard? I swapped out several voices for
+"drums", added a bit of global reverb with JCRev, and the piece is done.
+
+I hooked up Audio Hijack to Warp, added a little compression and loudness management, hit record, and ran it.

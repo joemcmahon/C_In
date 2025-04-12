@@ -1,3 +1,7 @@
+// First drum version of sorted-phrase version of  "In C".
+// This version takes advantage of the bug that Claude introduced
+// to have tuned "toms" as several of the performers.
+
 // ChucK Performance of Terry Riley's 'In C'
 //
 // In this famous canon by composer Terry Riley, each performer is given the

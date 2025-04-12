@@ -1,3 +1,6 @@
+// Original version, with the phrases sorted into ascending order:
+//  - shortest, lowest note first, longest, highest last.
+//  - also sorts the phrases from shortest to longest.
 
 // ChucK Performance of Terry Riley's 'In C'
 //
