@@ -25,7 +25,8 @@
 12 => int maxRepeats; // maximum times to repeat a phrase
 6 => int gapSize;     // Maximum lead or lag for phrases
 
- [new Shakers,
+// Create STK instruments
+[new Shakers,
  new Rhodey,
  new Moog,
  new StifKarp,
@@ -37,7 +38,82 @@
  new Mandolin,
  new Mandolin] @=> StkInstrument players[];
 
-1.0/players.cap() => float mainGain;
+// Create panners for each instrument
+Pan2 panners[players.size()];
+
+// Create a global gain control for overall volume
+Gain globalGain => dac;
+0.8 => globalGain.gain; // Set the global gain to 80% to prevent overload
+
+1.0/players.cap() => float baseGain;
+
+// Pan values set to three distinct positions:
+// -1.0 (hard left), 0.0 (center), 1.0 (hard right)
+[-1.0,    // Hard left - Rhodey
+ -1.0,    // Hard left - Moog
+ -1.0,    // Hard left - StifKarp
+ 0.0,     // Center - Moog
+ 0.0,     // Center - Shaker (first instrument)
+ 0.0,     // Center - Clarinet 
+ 1.0,     // Hard right - Flute
+ 1.0,     // Hard right - Saxofony
+ -1.0,    // Hard left - Rhodey
+ 1.0,     // Hard right - Mandolin
+ 0.0]     // Center - Mandolin
+ @=> float panPositions[];
+
+// Individual instrument volume levels
+[0.5,     // Shaker - 50% volume (louder)
+ 0.15,    // Rhodey
+ 0.15,    // Moog
+ 0.15,    // StifKarp
+ 0.15,    // Moog
+ 0.15,    // Clarinet
+ 0.15,    // Flute
+ 0.15,    // Saxofony
+ 0.15,    // Rhodey
+ 0.15,    // Mandolin
+ 0.15]    // Mandolin
+ @=> float volumeLevels[];
+
+// Transpose settings: 0 = no transpose, 1 = octave up, -1 = octave down
+[0,     // No transpose - Shaker
+ 1,     // Octave up - Rhodey 
+ -1,    // Octave down - Moog
+ 0,     // No transpose - StifKarp
+ 1,     // Octave up - Moog
+ 0,     // No transpose - Clarinet
+ 0,     // No transpose - Flute
+ -1,    // Octave down - Saxofony
+ 0,     // No transpose - Rhodey
+ 0,     // No transpose - Mandolin
+ 1]     // Octave up - Mandolin
+ @=> int transposeOctaves[];
+
+// calculate octave offset and set base frequencies as required
+for (1 => int i; i < transposeOctaves.size(); i++) {
+    220.0 => float baseFreq;
+    if (transposeOctaves[i] == -1) {
+        110.0 => baseFreq;
+    }
+    if (transposeOctaves[i] == 1) {
+        440.0 => baseFreq;
+    }
+    baseFreq => players[i].freq;
+}
+
+
+// Connect each instrument to its panner and set parameters
+for (0 => int i; i < players.size(); i++) {
+    // Connect each instrument to its panner and then to the global gain
+    players[i] => panners[i] => globalGain;
+    
+    // Set pan position
+    panPositions[i] => panners[i].pan;
+    
+    // Set volume level for each instrument
+    volumeLevels[i] => players[i].gain;
+}
 
 [
   // midi pitch, vol, start-ticks, dur-ticks
@@ -499,7 +575,7 @@ fun void playPhrase(int ph[][], StkInstrument voc)
      // convert midi-note to frequency
      Std.mtof(ph[i][0]) => voc.freq;
      // convert midi-vol to gain (and randomize it a bit)
-     (mainGain*ph[i][1]+Std.rand2(0,9)-4)/127.0 => voc.gain;
+     (baseGain*ph[i][1]+Std.rand2(0,9)-4)/127.0 => voc.gain;
    }
    else {
       // rest
